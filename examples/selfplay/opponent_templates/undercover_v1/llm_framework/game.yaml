@@ -1,0 +1,115 @@
+background: |
+  You are playing undercover game.
+  There are two roles: Undercover and Non-undercover.
+  Everyone receives one word; the Undercover’s word differs from the others.
+  Players give short, vague clues about their word for several rounds without revealing it.
+  After clue rounds, everyone votes for who they think is the Undercover. The Undercover should try to blend in.
+
+state:
+  schema:
+    - name: round
+      type: int
+      description: Current round number
+    - name: hp
+      type: list[int]
+      description: Players' HP, List in the order of players
+    - name: player_choices
+      type: list[int]
+      description: The number chosen by each player **last** round, List in the order of players
+    - name: target
+      type: float
+      description: target value in **last** round, that is average*0.8
+
+  parser:
+    type: llm
+    model: "xiaoai:gpt-5-nano"
+    prompts: "You should first output the analysis of the game record step by step, and then  **extract the most current (latest) game state** output as JSON.  | 
+      If a field's value cannot be found from the game record, return `null` for that field in the JSON output."
+    retries: 2
+
+
+action:
+  schema:
+    - name: answer
+      type: str
+      description: response
+  parser:
+    type: json
+
+
+
+prompts:
+  cot: |
+    Before output final answer, first walk me through your reasoning step by step, showing observations and how each leads to the next conclusion. Keep each step explicit and linear, then provide your final answer in given json schema.
+  tot: |
+    Before output final answer, first Generate several independent idea branches for this problem and evaluate each branch briefly. End with the branch you find most promising and why, then provide your final answer in given json schema.
+  Reflection: |
+    Before output final answer, first Review your previous conclusions and list any likely mistakes or blind spots you see. Suggest one concrete change you would make based on that review, then provide your final answer in given json schema.
+  kr: 
+    - Before output final answer, first Imagine how another smart person would interpret your recent actions and state their most likely conclusion about you.
+    - Given that imagined conclusion, describe the single best move you would take next to advance your goal. Output final answer in given json schema.
+
+    
+
+
+#  state:
+#   schema:
+#     - name: round
+#       type: int
+#       description: Current round number
+#     - name: hp
+#       type: list[int]
+#       description: Players' HP
+#     - name: target
+#       type: float
+#       description: Target value
+#   parser:
+#     type: llm
+#     model: "gpt-4o-mini"
+#     retries: 3
+
+# action:
+#   schema:
+#     - name: choice
+#       type: int
+#       description: Chosen number
+#     - name: confirm
+#       type: bool
+#       description: Whether agent confirms its action
+#   parser:
+#     type: regex
+#     pattern: "I choose (\\d+).*confirm=(true|false)"
+
+# # 另一种 action 配置示例（可切换用）
+#   # JSON 模式
+#     schema:
+#       - name: move
+#         type: str
+#         description: Direction to move
+#       - name: steps
+#         type: int
+#         description: Steps to take
+#     parser:
+#       type: json
+
+#   # split 模式
+#     schema:
+#       - name: item
+#         type: str
+#         description: Item to pick
+#       - name: quantity
+#         type: int
+#         description: Number of items
+#     parser:
+#       type: split
+#       sep: ","
+
+#   # text 模式
+#   text_mode:
+#     schema:
+#       - name: speaking
+#         type: str
+#         description: Agent's direct response
+#     parser:
+#       type: text
+

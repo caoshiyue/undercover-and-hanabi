@@ -1,0 +1,142 @@
+# 通用 .gitignore 配置文件
+
+# 操作系统文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+# 编辑器/IDE文件
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.swp
+*.swo
+*~
+.idea/
+*.iml
+*.iws
+*.ipr
+.settings/
+.project
+.classpath
+.nb-gradle/
+nbproject/
+build/
+nbbuild/
+dist/
+nbdist/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# 编译生成文件
+*.exe
+*.dll
+*.so
+*.dylib
+*.class
+*.jar
+*.war
+*.ear
+*.py[cod]
+*$py.class
+*.so
+__pycache__/
+
+# 依赖目录
+node_modules/
+vendor/
+packages/
+/.bundle
+/vendor/bundle
+*.gem
+
+# 环境文件
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 日志文件
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 运行时文件
+*.pid
+*.seed
+*.pid.lock
+
+# 构建输出
+dist/
+build/
+out/
+target/
+
+# 临时文件
+tmp/
+temp/
+.cache/
+
+# 数据库文件
+*.sqlite
+*.db
+
+# 覆盖文件
+*.rej
+*.orig
+
+# 测试输出
+coverage/
+.nyc_output/
+
+# 压缩文件
+*.tgz
+*.tar.gz
+
+# Python 虚拟环境
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# 文档生成
+site/
+
+# 上传文件
+.uploads/
+
+# 备份文件
+*.backup
+*.bak
+
+# Windows 文件
+[Tt]humbs.db
+
+# 空目录占位文件（保留）
+!.gitkeep
+
+# 确保 .gitignore 本身不被忽略
+!.gitignore
+
+
+
+openrl.egg-info/
+scripts/
+conda/
+docker/
+api_key.py

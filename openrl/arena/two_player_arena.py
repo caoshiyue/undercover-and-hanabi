@@ -44,11 +44,11 @@ class TwoPlayerArena(BaseArena):
             agent1 = self.agents[agent1_name]
             agent2 = self.agents[agent2_name]
             
-            agent1_rating = deepcopy(agent1.rating) 
-            agent2_rating = deepcopy(agent2.rating)
+            # agent1_rating = deepcopy(agent1.rating) 
+            # agent2_rating = deepcopy(agent2.rating)
 
-            agent1.update_trueskill(BattleResult.DRAW,agent2_rating)
-            agent2.update_trueskill(BattleResult.DRAW,agent1_rating)
+            # agent1.update_trueskill(BattleResult.DRAW,agent2_rating)
+            # agent2.update_trueskill(BattleResult.DRAW,agent1_rating)
 
         else:
             for agent_name in result["winners"]:
@@ -62,11 +62,11 @@ class TwoPlayerArena(BaseArena):
             winner = self.agents[winner_name]
             loser = self.agents[loser_name]
 
-            winner_rating = deepcopy(winner.rating) 
-            loser_rating = deepcopy(loser.rating)
+            # winner_rating = deepcopy(winner.rating) 
+            # loser_rating = deepcopy(loser.rating)
 
-            winner.update_trueskill(BattleResult.WIN,loser_rating)
-            loser.update_trueskill(BattleResult.LOSE,winner_rating)
+            # winner.update_trueskill(BattleResult.WIN,loser_rating)
+            # loser.update_trueskill(BattleResult.LOSE,winner_rating)
 
         for agent_name,reward in result['total_reward'].items():
             self.agents[agent_name].add_reward(reward)

@@ -82,7 +82,7 @@ def BidEnv(render_mode, **kwargs):
 def HanabiEnv(render_mode, **kwargs):
     return hanabi_v5.env(colors=2, ranks=5, players=2, hand_size=2, max_information_tokens=3, max_life_tokens=1, observation_type='card_knowledge')
 def UndercoverEnv(render_mode, **kwargs):
-    return undercover_v1.env(render_mode=None,undercover_mode="semi") #random, semi, fixed
+    return undercover_v1.env(render_mode=None,undercover_mode="fixed") #random, semi, fixed
 def register_new_envs():
     register("connect_four_v3", ConnectFourEnv)
     register("chess_v6", ChessEnv)
@@ -260,7 +260,7 @@ if __name__ == "__main__":
     game_env = "undercover_v1"  # "undercover_v1"
     
     Number_player=2 if game_env != "undercover_v1" else 5
-    models = ["cot"] * Number_player
+    models = ["llm"] * Number_player
 
 
 
@@ -269,12 +269,12 @@ if __name__ == "__main__":
 
     final_results = run_arena(
         render=False, 
-        parallel=True, 
+        parallel=False,  # True
         seed=75, 
-        total_games=2, # 这里的 total_games 会被正确使用
+        total_games=5, # 这里的 total_games 会被正确使用
         max_game_onetime=1, # 建议将此值设置为较小，以便测试循环逻辑
         game_envs=game_env, # 只运行当前循环中的一个环境
-        engine="xiaoai:gpt-5-nano@DEBUG", #@DEBUG
+        engine="xiaoai:gpt-4o-mini", #@DEBUG
         models=models,
     )
     print(f"Final results for all runs: {final_results}")

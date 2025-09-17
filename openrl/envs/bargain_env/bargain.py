@@ -16,6 +16,7 @@ from gymnasium.utils import EzPickle
 from pettingzoo import AECEnv
 from pettingzoo.classic.tictactoe.board import Board
 from pettingzoo.utils import agent_selector, wrappers
+import pathlib
 
 def find_modes(values):
 
@@ -51,7 +52,8 @@ class raw_env(AECEnv, EzPickle):
         EzPickle.__init__(self, render_mode)
         self.num_players = num_players
         self.num_items = num_items
-        self.word_list = open("instances.txt","r").readlines()
+        file_dir = pathlib.Path(__file__).parent.resolve()
+        self.word_list = open(f"{file_dir}/instances.txt","r").readlines()
         self.agents = [f"player_{i}" for i in range(0,num_players)]
         self.possible_agents = self.agents[:]
 
@@ -79,7 +81,7 @@ class raw_env(AECEnv, EzPickle):
         self.truncations = {i: False for i in self.agents}
         self.infos = {i: {"legal_moves": list(range(0, num_players + 1))} for i in self.agents}
 
-        self._agent_selector = agent_selector(self.agents)
+        self._agent_selector = agent_selector.AgentSelector(self.agents)
         self.agent_selection = self._agent_selector.reset()
 
         self.render_mode = render_mode
@@ -123,7 +125,6 @@ class raw_env(AECEnv, EzPickle):
     def _legal_moves(self):
         return [i for i in range(len(self.board.squares)) if self.board.squares[i] == 0]
     def step(self, action):
-        print(action)
         if (
             self.terminations[self.agent_selection]
             or self.truncations[self.agent_selection]

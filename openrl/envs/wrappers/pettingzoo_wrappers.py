@@ -77,37 +77,71 @@ class RecordWinner(BaseWrapper, OpenRLBaseWrapper):
 
         return super().reset(seed, options)
 
-    def get_winners(self):
-        max_reward = max(self.total_rewards.values())
+    # def get_winners(self):
+    #     max_reward = max(self.total_rewards.values())
 
+    #     winners = [
+    #         agent
+    #         for agent, reward in self.total_rewards.items()
+    #         if reward == max_reward
+    #     ]
+    #     return winners
+
+    def get_winners_and_losers(self):
+        """
+        返回全部 agent 的 winners 和 losers。
+
+        winners: total_rewards 最大的 agent 列表
+        losers: 不是 winners 的 agent 列表
+        """
+        if not self.total_rewards:
+            return [], []  # 没有奖励时返回空列表
+
+        max_reward = max(self.total_rewards.values())
         winners = [
-            agent
-            for agent, reward in self.total_rewards.items()
-            if reward == max_reward
+            agent for agent, reward in self.total_rewards.items() if reward == max_reward
         ]
-        return winners
+        losers = [agent for agent in self.total_rewards if agent not in winners]
+
+        return winners, losers
+
 
     def last(self, observe: bool = True):
         """Returns observation, cumulative reward, terminated, truncated, info for the current agent (specified by self.agent_selection)."""
 
         agent = self.agent_selection
         # this may be miss the last reward for another agent
-        self.total_rewards[agent] += self._cumulative_rewards[agent]
+        # self.total_rewards[agent] += self._cumulative_rewards[agent]
+        #! 注意，这里有点问题，原来只有上面一行，现在先判断是不是全体结束，如果是，就把所有的（包括提前结束和现在的）agent奖励累加
+        all_finished = all(
+                (self.terminations.get(a, False) or self.truncations.get(a, False))
+                for a in self.agents
+            )
+        if all_finished:
+            for ag in self.agents:
+                rem = self._cumulative_rewards.get(ag, 0)
+                if rem:
+                    self.total_rewards[ag] = self.total_rewards.get(ag, 0) + rem
+                    self._cumulative_rewards[ag] = 0
+        else:
+            self.total_rewards[agent] += self._cumulative_rewards[agent]
+
         if hasattr(self.unwrapped,'board'):
             self.infos[agent]["board"] = self.unwrapped.board
         self.infos[agent]["env"] = self.unwrapped
         winners = None
         losers = None
+        
         for agent in self.terminations:
-
             self.infos[agent]['all_rewards'] = self.total_rewards
             if self.terminations[agent]:
 
                 if winners is None:
-                    winners = self.get_winners()
-                    losers = [player for player in self.agents if player not in winners]
+                    winners,losers  = self.get_winners_and_losers()
+                    #losers = [player for player in self.agents if player not in winners]
                 self.infos[agent]["winners"] = winners
                 self.infos[agent]["losers"] = losers
+                
 
         return super().last(observe)
 

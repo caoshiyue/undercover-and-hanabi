@@ -1,7 +1,9 @@
 background: |
-  You are in a survival challenge.
-  Each round, every player chooses an integer between 1 and 100.
-  Closest to 0.8 * average wins. Others lose 1 HP.
+  You are playing undercover game.
+  There are two roles: Undercover and Non-undercover.
+  Everyone receives one word; the Undercover’s word differs from the others.
+  Players give short, vague clues about their word for several rounds without revealing it.
+  After clue rounds, everyone votes for who they think is the Undercover. The Undercover should try to blend in.
 
 state:
   schema:
@@ -28,11 +30,11 @@ state:
 
 action:
   schema:
-    - name: Action
+    - name: answer
       type: str
       description: response
   parser:
-    type: json
+    type: text
 
 
 
@@ -48,6 +50,7 @@ prompts:
     - Given that imagined conclusion, describe the single best move you would take next to advance your goal. Output final answer in given json schema.
 
     
+
 
 #  state:
 #   schema:

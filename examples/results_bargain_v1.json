@@ -1,0 +1,20 @@
+{
+    "cot_0": {
+        "agent_name": "cot_0",
+        "num_experiments": 5,
+        "games_per_experiment": 10,
+        "win_rate_mean": 0.32,
+        "win_rate_std": 0.04472135954999581,
+        "avg_reward_mean": -0.48000000000000004,
+        "avg_reward_std": 0.7259476565152615
+    },
+    "llm_1": {
+        "agent_name": "llm_1",
+        "num_experiments": 5,
+        "games_per_experiment": 10,
+        "win_rate_mean": 0.44,
+        "win_rate_std": 0.151657508881031,
+        "avg_reward_mean": 0.48000000000000004,
+        "avg_reward_std": 0.7259476565152615
+    }
+}

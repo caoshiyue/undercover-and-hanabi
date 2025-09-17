@@ -9,6 +9,31 @@ import random
 import time
 from typing import Optional, Union, Dict, List
 from pathlib import Path
+import functools
+
+def retry(max_retries=3, delay=1, exceptions=(Exception,)):
+    """
+    重试装饰器
+    :param max_retries: 最大重试次数
+    :param delay: 每次重试之间的等待时间（秒）
+    :param exceptions: 捕获哪些异常触发重试
+    """
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            last_exception = None
+            for attempt in range(1, max_retries + 1):
+                try:
+                    return func(*args, **kwargs)
+                except exceptions as e:
+                    last_exception = e
+                    print(f"[WARN] {func.__name__} 第 {attempt}/{max_retries} 次调用失败: {e}")
+                    if attempt < max_retries:
+                        time.sleep(delay)
+            # 所有重试失败后抛出最后一次异常
+            raise last_exception
+        return wrapper
+    return decorator
 
 class env_Opponent(BaseLLMOpponent):
     opponent_action = None
@@ -213,33 +238,31 @@ class env_Opponent(BaseLLMOpponent):
 
 
     # ========== 对外接口：保持不变的调度逻辑 ==========
+    @retry(max_retries=3, delay=2)
     def _get_chat_action(self, action_mask, observation, info=None):
         """
         主调度方法：构建消息、请求动作、解析答案，并处理异常。
         """
-        try:
-            # 1. 构建消息
-            message = self._build_message(observation, action_mask)
-            
-            # 2. 请求动作
-            answer = self._request_action(message)
-            
-            # 3. 解析答案
-            action = self._parse_answer(answer, action_mask)
-
-        except Exception as e:
-            print(f"An error occurred: {e}. Falling back to a random action.")
-            # 你的原始代码有 time.sleep(1)，如果需要可以保留
-            # time.sleep(1)
-            
-            # Fallback 逻辑：从合法的动作中随机选择一个
-            indices_of_ones = [i for i, v in enumerate(action_mask) if v == 1]
-            action = random.choice(indices_of_ones)
-            print(f"Chose random action: {self.act2des.get(action, 'Unknown')} (ID: {action})")
-
-        # 你的原始代码中用于统计重试和非法动作的逻辑可以放在这里
-
+        #try:
+        # 1. 构建消息
+        message = self._build_message(observation, action_mask)
         
+        # 2. 请求动作
+        answer = self._request_action(message)
+
+        # 3. 解析答案
+        action = self._parse_answer(answer, action_mask)
+        #! 现在我们直接重试  
+        #except Exception as e:
+            # print(f"An error occurred: {e}. Falling back to a random action.")
+            # Fallback 逻辑：从合法的动作中随机选择一个
+            # indices_of_ones = [i for i, v in enumerate(action_mask) if v == 1]
+            # if indices_of_ones== []:
+            #     print ("没有合法动作")
+            #     return None
+            # action = random.choice(indices_of_ones)
+            # print(f"Chose random action: {self.act2des.get(action, 'Unknown')} (ID: {action})")
+                 
         return action   
 
     # def _get_chat_action(

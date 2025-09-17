@@ -2,7 +2,7 @@
 # Author:  
 # Description:  
 # LastEditors: Shiyuec
-# LastEditTime: 2025-09-12 06:16:03
+# LastEditTime: 2025-09-17 08:11:24
 ## 
 import openai
 import asyncio
@@ -14,6 +14,8 @@ import json
 # Assume api_key.py contains API_CONFIGS dictionary
 from api_key import API_CONFIGS
 import time
+import inspect
+
 LOG_FILE = "openai_log.json"
 
 # --- 0. 请求/响应预处理 & 解析器函数 ---
@@ -158,24 +160,61 @@ def async_adapter(func):
         return asyncio.run(func(*args, **kwargs))
     return wrapper
 
+# def retry(max_retries=3, delay=1, exceptions=(Exception,)):
+#     """Decorator to retry a function upon catching specific exceptions."""
+#     def decorator(func):
+#         @functools.wraps(func)
+#         async def async_wrapper(*args, **kwargs):
+#             retries = 0
+#             while retries < max_retries:
+#                 try:
+#                     return await func(*args, **kwargs)
+#                 except exceptions as e:
+#                     retries += 1
+#                     print(f"Function {func.__name__} failed, retry {retries}/{max_retries}: {e}")
+#                     if retries >= max_retries:
+#                         print(f"Function {func.__name__} reached max retries, failing.")
+#                         raise
+#                     await asyncio.sleep(delay)
+#         return async_wrapper
+#     return decorator
 def retry(max_retries=3, delay=1, exceptions=(Exception,)):
-    """Decorator to retry a function upon catching specific exceptions."""
+    """
+    通用 retry 装饰器，支持 sync / async 函数
+    """
     def decorator(func):
-        @functools.wraps(func)
-        async def async_wrapper(*args, **kwargs):
-            retries = 0
-            while retries < max_retries:
-                try:
-                    return await func(*args, **kwargs)
-                except exceptions as e:
-                    retries += 1
-                    print(f"Function {func.__name__} failed, retry {retries}/{max_retries}: {e}")
-                    if retries >= max_retries:
-                        print(f"Function {func.__name__} reached max retries, failing.")
-                        raise
-                    await asyncio.sleep(delay)
-        return async_wrapper
+        if inspect.iscoroutinefunction(func):
+            # 异步版本
+            @functools.wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                last_exception = None
+                for attempt in range(1, max_retries + 1):
+                    try:
+                        return await func(*args, **kwargs)
+                    except exceptions as e:
+                        last_exception = e
+                        print(f"[WARN] {func.__name__} 第 {attempt}/{max_retries} 次调用失败: {e}")
+                        if attempt < max_retries:
+                            await asyncio.sleep(delay)
+                raise last_exception
+            return async_wrapper
+        else:
+            # 同步版本
+            @functools.wraps(func)
+            def sync_wrapper(*args, **kwargs):
+                last_exception = None
+                for attempt in range(1, max_retries + 1):
+                    try:
+                        return func(*args, **kwargs)
+                    except exceptions as e:
+                        last_exception = e
+                        print(f"[WARN] {func.__name__} 第 {attempt}/{max_retries} 次调用失败: {e}")
+                        if attempt < max_retries:
+                            time.sleep(delay)
+                raise last_exception
+            return sync_wrapper
     return decorator
+
 
 # --- 3. ProviderConfig & Service (Partially REFACTORED) ---
 

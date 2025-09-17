@@ -2,7 +2,7 @@
 # Author:  
 # Description:  
 # LastEditors: Shiyuec
-# LastEditTime: 2025-09-02 06:39:15
+# LastEditTime: 2025-09-17 02:22:30
 ## 
 import re
 import json
@@ -44,6 +44,6 @@ def extract_json(text: str, first: bool = True) -> dict:
     all_jsons = find_all_json_objects(text)
     
     if not all_jsons:
-        raise ValueError("No valid JSON object found in text")
+        raise ValueError(f"No valid JSON object found in text: \n{text}")
 
     return all_jsons[0] if first else all_jsons[-1]

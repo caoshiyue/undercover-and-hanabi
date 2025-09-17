@@ -49,8 +49,10 @@ class BaseGame(ABC):
         player2agent_name = self.dispatch_func(
             self._np_random, players, list(agents.keys())
         )
+        
         for player in players:
             player2agent[player] = agents[player2agent_name[player]].new_agent()
+        
         return player2agent, player2agent_name
 
     @staticmethod

@@ -35,6 +35,7 @@ class MultiPlayerGame(BaseGame):
             agent_names
         ), "The number of players must be equal to the number of agents."
         assert len(players) == 2, "The number of players must be equal to 2."
+        
         np_random.shuffle(agent_names)
         return dict(zip(players, agent_names))
 
@@ -42,9 +43,17 @@ class MultiPlayerGame(BaseGame):
         env = env_fn()
         env.reset(seed=self.seed)
 
-        player2agent, player2agent_name = self.dispatch_agent_to_player(
-            env.agents, agents
-        )
+        #! 应该在这里随机排列 ，但我们不能这样 
+        # player2agent, player2agent_name = self.dispatch_agent_to_player(
+        #     env.agents, agents
+        # )
+        player2agent = {}
+        player2agent_name = {}
+        
+        for player, agent_name in zip(env.agents, agents.keys()):
+            player2agent[player] = agents[agent_name].new_agent()
+            player2agent_name[player] = agent_name
+
 
         for player, agent in player2agent.items():
             agent.reset(env, player)
@@ -55,7 +64,7 @@ class MultiPlayerGame(BaseGame):
             all_rewards = {}
             for player_name in env.agent_iter():
                 observation, reward, termination, truncation, info = env.last()
-
+                #! 应该是 player_name
                 if termination:
                     all_rewards[player2agent_name[player]] = info['all_rewards']
                     break

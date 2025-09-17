@@ -2,7 +2,7 @@
 # Author:  
 # Description:  
 # LastEditors: Shiyuec
-# LastEditTime: 2025-09-17 06:40:41
+# LastEditTime: 2025-09-16 03:24:09
 ## 
 from abc import ABC, abstractmethod
 from typing import Any, Dict
@@ -25,7 +25,6 @@ class AbstractAgent(ABC):
         self.model= kwargs["model"]
 
     @async_adapter
-    @retry(max_retries=3, delay=2)
     async def act(self, input_text) -> Dict[str, Any]:
         """
         接收环境文本，返回结构化动作。
@@ -33,11 +32,8 @@ class AbstractAgent(ABC):
         1. 调用子类实现的 get_action
         2. 调用 config.parse_action 做解析
         """
-
-        
         raw_action = await self.get_action(input_text)
         parsed_action = self.config.parse_action(raw_action)
-
         return parsed_action
 
     @abstractmethod
@@ -61,7 +57,7 @@ class LLMOnly(AbstractAgent):
             model = self.model,
             messages=input_text,
             temperature=0.7,
-            max_tokens=8000,
+            max_tokens=4000,
             )
         
         return res
@@ -74,7 +70,7 @@ class Cot(AbstractAgent):
             model = self.model,
             messages=input_text,
             temperature=0.7,
-            max_tokens=8000,
+            max_tokens=4000,
             )
         
         return res
@@ -87,7 +83,7 @@ class Tot(AbstractAgent):
             model = self.model,
             messages=input_text,
             temperature=0.7,
-            max_tokens=8000,
+            max_tokens=4000,
             )
         
         return res

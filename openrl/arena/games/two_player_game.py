@@ -42,9 +42,16 @@ class TwoPlayerGame(BaseGame):
         env = env_fn()
         env.reset(seed=self.seed)
 
-        player2agent, player2agent_name = self.dispatch_agent_to_player(
-            env.agents, agents
-        )
+        #! 应该在这里随机排列 ，但我们不能这样 
+        # player2agent, player2agent_name = self.dispatch_agent_to_player(
+        #     env.agents, agents
+        # )
+        player2agent = {}
+        player2agent_name = {}
+        
+        for player, agent_name in zip(env.agents, agents.keys()):
+            player2agent[player] = agents[agent_name].new_agent()
+            player2agent_name[player] = agent_name
 
         for player, agent in player2agent.items():
             agent.reset(env, player)
@@ -55,16 +62,20 @@ class TwoPlayerGame(BaseGame):
             all_rewards = {}
             for player_name in env.agent_iter():
                 observation, reward, termination, truncation, info = env.last()
-
-                if termination:
+                
+                if termination or truncation: 
+                    #! 这写的逻辑是错的，但能运行，player 和 player_name 搞混了
                     all_rewards[player2agent_name[player]] = info['all_rewards']
-                    break
+                    env.step([None,])
+                    continue
                 action = player2agent[player_name].act(
                     player_name, observation, reward, termination, truncation, info
                 )
+                #! 这有个问题，可能是 agent 结束了，但环境没结束，但要求action是None , 但问题是 多人代码也是这样写的 但没报错
+ 
                 env.step(action)
 
-            if termination:
+            if termination or truncation:
                 assert "winners" in info, "The game is terminated but no winners."
                 assert "losers" in info, "The game is terminated but no losers."
                 all_rewards[player2agent_name[player]]
@@ -75,6 +86,7 @@ class TwoPlayerGame(BaseGame):
                 result["losers"] = [
                     player2agent_name[player] for player in info["losers"]
                 ]
+                #print(result)
                 break
         env.close()
         return result
